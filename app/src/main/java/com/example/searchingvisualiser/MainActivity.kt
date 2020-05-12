@@ -64,8 +64,12 @@ class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
             if(selected!=-1) {
                 if (searchAlgoSelectedValue == 0) {
                     linearSearch()
-                } else if (searchAlgoSelectedValue == 1) {
+                }
+                else if (searchAlgoSelectedValue == 1) {
                     makeAlertBox("Binary Search")
+                }
+                else if (searchAlgoSelectedValue == 2) {
+                    makeAlertBox("Jump Search")
                 }
                 else if(searchAlgoSelectedValue==3){
                     makeAlertBox("Interpolation Search")
@@ -96,6 +100,11 @@ class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
             if(searchAlgoSelectedValue==1) {
                 GlobalScope.launch(Dispatchers.Main) {
                     binarySearch(0, size, selected)
+                }
+            }
+            else if(searchAlgoSelectedValue==2){
+                GlobalScope.launch(Dispatchers.Main) {
+                    jumpSearch()
                 }
             }
             else if(searchAlgoSelectedValue==3){
@@ -230,7 +239,11 @@ class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
         }
     }
 
-    private fun JumpSearch() {
+    private suspend fun jumpSearch() {
+        var job=GlobalScope.launch(Dispatchers.Main) {
+            insertionSort()
+        }
+        job.join()
         GlobalScope.launch(Dispatchers.IO) {
             val n = arrayToBeSearched.size
 
@@ -252,7 +265,6 @@ class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
             }
         }
     }
-
 
     private suspend fun interpolationSearch(p: Int, q: Int, x: Int){
         var job=GlobalScope.launch(Dispatchers.Main) {

@@ -28,9 +28,7 @@
         android:layout_marginStart="24dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="24dp"
-        android:text="As its core, a searching algorithm seeks to find
-        the selected bar users want to find.
-        This application visualizes various searching algorithms in action, and more!"
+        android:text="As its core, a searching algorithm seeks to find the selected bar users want to find. This application visualizes various searching algorithms in action, and more!"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -43,9 +41,7 @@
         android:layout_marginStart="24dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="24dp"
-        android:text='All of algorithms on this application are adapter for
-        a 2D grid,where each bar in upside down represents an object. User can click on any
-        to find it.'
+        android:text='All of algorithms on this application are adapter for a 2D grid,where each bar in upside down represents an object. User can click on any to find it.'
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView5" />
