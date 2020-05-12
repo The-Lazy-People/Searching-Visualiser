@@ -39,7 +39,7 @@ class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
     var selected:Int=-1
     var numberShouldNotBeDublicate:MutableMap<Int,Int> = mutableMapOf()
     var searchAlgoSelectedValue:Int=0
-    var arraySortedOrNot=0;
+    var arraySortedOrNot=0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -86,49 +86,71 @@ class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
     }
 
     private fun makeAlertBox(searchingAlgoName:String) {
-        val builder = AlertDialog.Builder(this)
-        //set title for alert dialog
-        builder.setTitle("Array Need To be Sorted")
-        //set message for alert dialog
-        builder.setMessage(searchingAlgoName+" can only work on Sorted data. You need to sort the array first.")
-        builder.setIcon(android.R.drawable.ic_dialog_alert)
+        if(arraySortedOrNot==0) {
+            val builder = AlertDialog.Builder(this)
+            //set title for alert dialog
+            builder.setTitle("Array Need To be Sorted")
+            //set message for alert dialog
+            builder.setMessage(searchingAlgoName + " can only work on Sorted data. You need to sort the array first.")
+            builder.setIcon(android.R.drawable.ic_dialog_alert)
 
-        //performing positive action
-        builder.setPositiveButton("SORT!"){dialogInterface, which ->
-            Toast.makeText(applicationContext,"SORTING!!",Toast.LENGTH_LONG).show()
-            arraySortedOrNot=1
-            if(searchAlgoSelectedValue==1) {
+            //performing positive action
+            builder.setPositiveButton("SORT!") { dialogInterface, which ->
+                Toast.makeText(applicationContext, "SORTING!!", Toast.LENGTH_LONG).show()
+
+                if (searchAlgoSelectedValue == 1) {
+                    GlobalScope.launch(Dispatchers.Main) {
+                        binarySearch(0, size, selected)
+                    }
+                } else if (searchAlgoSelectedValue == 2) {
+                    GlobalScope.launch(Dispatchers.Main) {
+                        jumpSearch()
+                    }
+                } else if (searchAlgoSelectedValue == 3) {
+                    GlobalScope.launch(Dispatchers.Main) {
+                        interpolationSearch(0, size, selected)
+                    }
+                } else if (searchAlgoSelectedValue == 4) {
+                    GlobalScope.launch(Dispatchers.Main) {
+                        ExponentialSearch(selected)
+                    }
+                }
+            }
+            //performing cancel action
+            builder.setNeutralButton("Cancel") { dialogInterface, which ->
+                Toast.makeText(
+                    applicationContext,
+                    "Cancelled! choose diff algorithm",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+            //performing negative action
+
+            // Create the AlertDialog
+            val alertDialog: AlertDialog = builder.create()
+            // Set other dialog properties
+            alertDialog.setCancelable(false)
+            alertDialog.show()
+        }
+        else if(arraySortedOrNot==1){
+            if (searchAlgoSelectedValue == 1) {
                 GlobalScope.launch(Dispatchers.Main) {
                     binarySearch(0, size, selected)
                 }
-            }
-            else if(searchAlgoSelectedValue==2){
+            } else if (searchAlgoSelectedValue == 2) {
                 GlobalScope.launch(Dispatchers.Main) {
                     jumpSearch()
                 }
-            }
-            else if(searchAlgoSelectedValue==3){
+            } else if (searchAlgoSelectedValue == 3) {
                 GlobalScope.launch(Dispatchers.Main) {
                     interpolationSearch(0, size, selected)
                 }
-            }
-            else if(searchAlgoSelectedValue==4){
+            } else if (searchAlgoSelectedValue == 4) {
                 GlobalScope.launch(Dispatchers.Main) {
                     ExponentialSearch(selected)
                 }
             }
         }
-        //performing cancel action
-        builder.setNeutralButton("Cancel"){dialogInterface , which ->
-            Toast.makeText(applicationContext,"Cancelled! choose diff algorithm",Toast.LENGTH_SHORT).show()
-        }
-        //performing negative action
-
-        // Create the AlertDialog
-        val alertDialog: AlertDialog = builder.create()
-        // Set other dialog properties
-        alertDialog.setCancelable(false)
-        alertDialog.show()
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
@@ -195,11 +217,13 @@ class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
     }
 
     private suspend fun binarySearch(p: Int, q: Int, x: Int){
-        if(searchAlgoSelectedValue==1) {
-            var job = GlobalScope.launch(Dispatchers.Main) {
-                insertionSort()
+        if(arraySortedOrNot==0) {
+            if (searchAlgoSelectedValue == 1) {
+                var job = GlobalScope.launch(Dispatchers.Main) {
+                    insertionSort()
+                }
+                job.join()
             }
-            job.join()
         }
         GlobalScope.launch (Dispatchers.IO) {
             //Toast.makeText(this, "$p $q $x", Toast.LENGTH_LONG).show()
@@ -240,10 +264,12 @@ class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
     }
 
     private suspend fun jumpSearch() {
-        var job=GlobalScope.launch(Dispatchers.Main) {
-            insertionSort()
+        if(arraySortedOrNot==0) {
+            var job = GlobalScope.launch(Dispatchers.Main) {
+                insertionSort()
+            }
+            job.join()
         }
-        job.join()
         GlobalScope.launch(Dispatchers.Main) {
             val n = arrayToBeSearched.size
 
@@ -282,10 +308,12 @@ class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
     }
 
     private suspend fun interpolationSearch(p: Int, q: Int, x: Int){
-        var job=GlobalScope.launch(Dispatchers.Main) {
-            insertionSort()
+        if(arraySortedOrNot==0) {
+            var job = GlobalScope.launch(Dispatchers.Main) {
+                insertionSort()
+            }
+            job.join()
         }
-        job.join()
         GlobalScope.launch (Dispatchers.IO) {
             //Toast.makeText(this, "$p $q $x", Toast.LENGTH_LONG).show()
             var l = p
@@ -325,10 +353,12 @@ class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
     }
 
     suspend fun ExponentialSearch(x:Int){
-        var job=GlobalScope.launch(Dispatchers.Main) {
-            insertionSort()
+        if(arraySortedOrNot==0) {
+            var job = GlobalScope.launch(Dispatchers.Main) {
+                insertionSort()
+            }
+            job.join()
         }
-        job.join()
         if (arrayToBeSearched[0] === x){
             colorButton(0, arrayToBeSearched[0], pinkColor)
             delay(1000)
@@ -373,6 +403,7 @@ class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
                 colorButton(j + 1, item, greenColor)
                 arrayToBeSearched[j + 1] = item
             }
+            arraySortedOrNot = 1
         }
         job.join()
     }
