@@ -253,15 +253,30 @@ class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
             // Finding the block where element is
             // present (if it is present)
             var prev = 0
-            while (arrayToBeSearched[Math.min(step, n) - 1] < selected) {
+            while (arrayToBeSearched[min(step, n) - 1] < selected) {
                 colorButton(min(step, n) - 1, arrayToBeSearched[min(step, n) - 1], pinkColor)
-                delay(200)
+                delay(1000)
                 paintSingleColWhite(min(step, n) - 1)
                 colorButton(min(step, n) - 1, arrayToBeSearched[min(step, n) - 1], greenColor)
                 prev = step
                 step += floor(Math.sqrt(n.toDouble())).toInt()
                 if (prev >= n)
                     break;
+            }
+            // Doing a linear search for x in block
+            // beginning with prev.
+            while (arrayToBeSearched[prev] < selected) {
+                colorButton(prev, arrayToBeSearched[prev], pinkColor)
+                delay(1000)
+                paintSingleColWhite(prev)
+                colorButton(prev, arrayToBeSearched[prev], greenColor)
+                prev++
+            }
+
+            if (arrayToBeSearched[prev] == selected)
+            {
+                colorButton(prev, arrayToBeSearched[prev], blueColor)
+                delay(1000)
             }
         }
     }
