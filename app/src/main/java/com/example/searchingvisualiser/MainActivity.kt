@@ -1,7 +1,7 @@
 package com.example.searchingvisualiser
 
+
 import android.graphics.Color
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -10,11 +10,15 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.SeekBar
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.math.min
+
 
 class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
 
@@ -27,13 +31,14 @@ class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
     val whiteColor:String="#FFFFFF"
     //red color
     val redColor:String="#FF0000"
-    val pink:String="#ffdab9"
+    val pinkColor:String="#ffdab9"
     //green color
     val greenColor:String="#228B22"
-    val bluecolr:String="#0000FF"
+    val blueColor:String="#0000FF"
     var selected:Int=-1
     var numberShouldNotBeDublicate:MutableMap<Int,Int> = mutableMapOf()
     var searchAlgoSelectedValue:Int=0
+    var arraySortedOrNot=0;
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,11 +62,15 @@ class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
         searchbtn.setOnClickListener {
             if(selected!=-1) {
                 if (searchAlgoSelectedValue == 0) {
-                    LinearSearch()
+                    linearSearch()
                 } else if (searchAlgoSelectedValue == 1) {
-                    GlobalScope.launch(Dispatchers.Main) {
-                        BinarySearch(0, size, selected)
-                    }
+                    makeAlertBox("Binary Search")
+                }
+                else if(searchAlgoSelectedValue==3){
+                    makeAlertBox("Interpolation Search")
+                }
+                else if(searchAlgoSelectedValue==4){
+                    makeAlertBox("Exponential Search")
                 }
             }
             else if(selected==-1){
@@ -70,11 +79,54 @@ class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
         }
 
     }
+
+    private fun makeAlertBox(searchingAlgoName:String) {
+        val builder = AlertDialog.Builder(this)
+        //set title for alert dialog
+        builder.setTitle("Array Need To be Sorted")
+        //set message for alert dialog
+        builder.setMessage(searchingAlgoName+" can only work on Sorted data. You need to sort the array first.")
+        builder.setIcon(android.R.drawable.ic_dialog_alert)
+
+        //performing positive action
+        builder.setPositiveButton("SORT!"){dialogInterface, which ->
+            Toast.makeText(applicationContext,"SORTING!!",Toast.LENGTH_LONG).show()
+            arraySortedOrNot=1
+            if(searchAlgoSelectedValue==1) {
+                GlobalScope.launch(Dispatchers.Main) {
+                    binarySearch(0, size, selected)
+                }
+            }
+            else if(searchAlgoSelectedValue==3){
+                GlobalScope.launch(Dispatchers.Main) {
+                    interpolationSearch(0, size, selected)
+                }
+            }
+            else if(searchAlgoSelectedValue==4){
+                GlobalScope.launch(Dispatchers.Main) {
+                    ExponentialSearch(selected)
+                }
+            }
+        }
+        //performing cancel action
+        builder.setNeutralButton("Cancel"){dialogInterface , which ->
+            Toast.makeText(applicationContext,"Cancelled! choose diff algorithm",Toast.LENGTH_SHORT).show()
+        }
+        //performing negative action
+
+        // Create the AlertDialog
+        val alertDialog: AlertDialog = builder.create()
+        // Set other dialog properties
+        alertDialog.setCancelable(false)
+        alertDialog.show()
+    }
+
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         //return super.onCreateOptionsMenu(menu)
         menuInflater.inflate(R.menu.searching_algo_name, menu)
         return true
     }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when(item.itemId){
             R.id.linearSearch -> {
@@ -111,7 +163,7 @@ class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
         return super.onOptionsItemSelected(item)
     }
 
-    private fun LinearSearch() {
+    private fun linearSearch() {
         GlobalScope.launch(Dispatchers.IO)
         {
             if (selected == -1) {
@@ -119,12 +171,12 @@ class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
             } else {
                 for (i in 0..size) {
                     colorButton(i, arrayToBeSearched[i], redColor)
-                    delay(100)
+                    delay(300)
                     paintSingleColWhite(i)
                     colorButton(i, arrayToBeSearched[i], greenColor)
                     if (arrayToBeSearched[i] == selected) {
                         //Toast.makeText(this, "Element found at $i", Toast.LENGTH_LONG).show()
-                        colorButton(i, arrayToBeSearched[i], bluecolr)
+                        colorButton(i, arrayToBeSearched[i], blueColor)
                         break;
                     }
                 }
@@ -132,7 +184,52 @@ class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
         }
     }
 
-    private suspend fun BinarySearch(p: Int, q: Int, x: Int){
+    private suspend fun binarySearch(p: Int, q: Int, x: Int){
+        if(searchAlgoSelectedValue==1) {
+            var job = GlobalScope.launch(Dispatchers.Main) {
+                insertionSort()
+            }
+            job.join()
+        }
+        GlobalScope.launch (Dispatchers.IO) {
+            //Toast.makeText(this, "$p $q $x", Toast.LENGTH_LONG).show()
+            var l = p
+            var r = q
+            while (l <= r) {
+                val m = l + (r - l) / 2
+                colorButton(m, arrayToBeSearched[m], pinkColor)
+                delay(1000)
+                paintSingleColWhite(m)
+                colorButton(m, arrayToBeSearched[m], greenColor)
+                if (arrayToBeSearched[m] == x) {
+                    colorButton(m, arrayToBeSearched[m], blueColor)
+                    break
+                }
+
+                if (arrayToBeSearched[m] < x) {
+                    l = m + 1
+                    for (i in l..r){
+                        colorButton(i, arrayToBeSearched[i], blueColor)
+                    }
+                    delay(1000)
+                    for (i in l..r){
+                        colorButton(i, arrayToBeSearched[i], greenColor)
+                    }
+                } else {
+                    r = m - 1
+                    for (i in l..r){
+                        colorButton(i, arrayToBeSearched[i], blueColor)
+                    }
+                    delay(1000)
+                    for (i in l..r){
+                        colorButton(i, arrayToBeSearched[i], greenColor)
+                    }
+                }
+            }
+        }
+    }
+
+    private suspend fun interpolationSearch(p: Int, q: Int, x: Int){
         var job=GlobalScope.launch(Dispatchers.Main) {
             insertionSort()
         }
@@ -142,22 +239,64 @@ class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
             var l = p
             var r = q
             while (l <= r) {
-                val m = l + (r - l) / 2
-                colorButton(m, arrayToBeSearched[m], pink)
-                delay(200)
+                val m = l + ((x-arrayToBeSearched[l])*(r-l))/(arrayToBeSearched[r]-arrayToBeSearched[l])
+                colorButton(m, arrayToBeSearched[m], pinkColor)
+                delay(1000)
                 paintSingleColWhite(m)
                 colorButton(m, arrayToBeSearched[m], greenColor)
                 if (arrayToBeSearched[m] == x) {
-                    colorButton(m, arrayToBeSearched[m], bluecolr)
+                    colorButton(m, arrayToBeSearched[m], blueColor)
                     break
                 }
 
                 if (arrayToBeSearched[m] < x) {
                     l = m + 1
+                    for (i in l..r){
+                        colorButton(i, arrayToBeSearched[i], blueColor)
+                    }
+                    delay(1000)
+                    for (i in l..r){
+                        colorButton(i, arrayToBeSearched[i], greenColor)
+                    }
                 } else {
                     r = m - 1
+                    for (i in l..r) {
+                        colorButton(i, arrayToBeSearched[i], blueColor)
+                    }
+                    delay(1000)
+                    for (i in l..r) {
+                        colorButton(i, arrayToBeSearched[i], greenColor)
+                    }
                 }
             }
+        }
+    }
+
+    suspend fun ExponentialSearch(x:Int){
+        var job=GlobalScope.launch(Dispatchers.Main) {
+            insertionSort()
+        }
+        job.join()
+        if (arrayToBeSearched[0] === x){
+            colorButton(0, arrayToBeSearched[0], pinkColor)
+            delay(1000)
+            paintSingleColWhite(0)
+            colorButton(0, arrayToBeSearched[0], blueColor)
+        }
+        else {
+
+            var i = 1
+            while (i <=size && arrayToBeSearched[i] <= x) {
+                i = i * 2
+                colorButton(i/2,arrayToBeSearched[i/2],redColor)
+                colorButton(min(i,size),arrayToBeSearched[min(i,size)],redColor)
+                delay(500)
+                colorButton(i/2,arrayToBeSearched[i/2],greenColor)
+                colorButton(min(i,size),arrayToBeSearched[min(i,size)],greenColor)
+            }
+
+
+            binarySearch(i / 2, min(i, size), x)
         }
     }
 
@@ -170,7 +309,7 @@ class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
                 var j = i - 1
                 while (j >= 0 && arrayToBeSearched[j] > item) {
                     colorButton(j+1,arrayToBeSearched[j+1],redColor)
-                    delay(100)
+                    delay(50)
                     paintSingleColWhite(j + 1)
                     colorButton(j + 1, arrayToBeSearched[j], greenColor)
                     arrayToBeSearched[j + 1] = arrayToBeSearched[j]
@@ -199,6 +338,7 @@ class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
     }
 
     private fun randamize(size: Int) {
+        arraySortedOrNot=0
         selected=-1
         numberShouldNotBeDublicate.clear()
         arrayToBeSearched.removeAll(arrayToBeSearched)
@@ -224,12 +364,12 @@ class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
         }
 
     }
-    // color a coloumn of grid till a specific row
+
     private fun colorButton(col: Int, row: Int,color:String) {
         for (i in 0..row){
             buttons[col][i].isEnabled=true
             buttons[col][i].setOnClickListener {
-                Toast.makeText(this, "${arrayToBeSearched[col]} is selected", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "${arrayToBeSearched[col]} is selected", Toast.LENGTH_SHORT).show()
                 selected = arrayToBeSearched[col]
             }
             buttons[col][i].setBackgroundColor(Color.parseColor(color))
@@ -313,7 +453,5 @@ class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
         paintAllButtonsWhiteAgain(size)
     }
 
-    override fun onStopTrackingTouch(seekBar: SeekBar?) {
-
-    }
+    override fun onStopTrackingTouch(seekBar: SeekBar?) {}
 }
