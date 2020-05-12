@@ -17,6 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.math.floor
 import kotlin.math.min
 
 
@@ -228,6 +229,30 @@ class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
             }
         }
     }
+
+    private fun JumpSearch() {
+        GlobalScope.launch(Dispatchers.IO) {
+            val n = arrayToBeSearched.size
+
+            // Finding block size to be jumped
+            var step = Math.floor(Math.sqrt(n.toDouble())).toInt()
+
+            // Finding the block where element is
+            // present (if it is present)
+            var prev = 0
+            while (arrayToBeSearched[Math.min(step, n) - 1] < selected) {
+                colorButton(min(step, n) - 1, arrayToBeSearched[min(step, n) - 1], pinkColor)
+                delay(200)
+                paintSingleColWhite(min(step, n) - 1)
+                colorButton(min(step, n) - 1, arrayToBeSearched[min(step, n) - 1], greenColor)
+                prev = step
+                step += floor(Math.sqrt(n.toDouble())).toInt()
+                if (prev >= n)
+                    break;
+            }
+        }
+    }
+
 
     private suspend fun interpolationSearch(p: Int, q: Int, x: Int){
         var job=GlobalScope.launch(Dispatchers.Main) {
