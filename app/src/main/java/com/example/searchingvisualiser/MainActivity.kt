@@ -244,7 +244,7 @@ class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
             insertionSort()
         }
         job.join()
-        GlobalScope.launch(Dispatchers.IO) {
+        GlobalScope.launch(Dispatchers.Main) {
             val n = arrayToBeSearched.size
 
             // Finding block size to be jumped
